@@ -1,4 +1,7 @@
 # PadSockets
+
+Initially uses a base of [Pad](https://github.com/petercunha/Pad) but with some additonal features rolled in.
+
 Setup:
 ```
 sudo apt update
