@@ -5,6 +5,7 @@ var logger = require('morgan')
 var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 var socketio = require('socket.io')
+var siofu = require("socketio-file-upload");
 
 var app = express()
 var io = socketio()
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/', index)
 app.use('/Pad', socket)
 
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   var err = new Error('Not Found')
@@ -45,5 +47,11 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500)
   res.render('error')
 })
+
+io.on("connection", function(socket){
+    var uploader = new siofu();
+    uploader.dir = "/tmp/";
+    uploader.listen(socket);
+});
 
 module.exports = app
