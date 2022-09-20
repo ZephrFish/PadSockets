@@ -5,7 +5,7 @@ var logger = require('morgan')
 var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 var socketio = require('socket.io')
-var siofu = require("socketio-file-upload");
+// var siofu = require("socketio-file-upload");
 
 var app = express()
 var io = socketio()
@@ -48,10 +48,10 @@ app.use(function (err, req, res, next) {
   res.render('error')
 })
 
-io.on("connection", function(socket){
-    var uploader = new siofu();
-    uploader.dir = "/tmp/";
-    uploader.listen(socket);
-});
+// io.on("connection", function(socket){
+//     var uploader = new siofu();
+//     uploader.dir = "/tmp/";
+//     uploader.listen(socket);
+// });
 
 module.exports = app

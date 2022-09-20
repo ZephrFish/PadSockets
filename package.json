@@ -19,6 +19,6 @@
   },
   "description": "Collaborative online notepad",
   "main": "app.js",
-  "author": "Peter Cunha",
-  "license": "MIT"
+  "author": "",
+  "license": ""
 }
