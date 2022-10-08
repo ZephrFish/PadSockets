@@ -1,6 +1,6 @@
 # PadSockets
 
-Initially uses a base of [Pad](https://github.com/petercunha/Pad) but with some additonal features rolled in.
+Initially uses a base of [Pad](https://github.com/petercunha/Pad) but with some additonal features rolled in (Work In progress).
 
 Setup:
 ```
