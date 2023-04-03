@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>WebSocket File Upload/Download Example</title>
+  </head>
+  <body>
+    <h1>WebSocket File Upload/Download Example</h1>
+    <input type="file" id="fileinput"><br><br>
+    <button id="uploadbutton">Upload</button>
+    <button id="downloadbutton">Download</button>
+    <br><br>
+    <div id="filelist"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://localhost:8765');
+
+      socket.on('connect', function() {
+        console.log('Connected to server');
+      });
+
+      socket.on('disconnect', function() {
+        console.log('Disconnected from server');
+      });
+
+      socket.on('upload_success', function(filename) {
+        console.log('File uploaded:', filename);
+        updateFileList();
+      });
+
+      socket.on('filesize', function(filesize) {
+        console.log('File size:', filesize);
+      });
+
+      socket.on('filedata', function(data) {
+        console.log('Received file data:', data);
+        // Do something with the file data
+      });
+
+      socket.on('download_error', function(error) {
+        console.log('Download error:', error);
+      });
+
+      function updateFileList() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementById('filelist').innerHTML = this.responseText;
+          }
+        };
+        xhttp.open('GET', '/files', true);
+        xhttp.send();
+      }
+
+      document.getElementById('uploadbutton').addEventListener('click', function() {
+        var fileinput = document.getElementById('fileinput');
+        var file = fileinput.files[0];
+        if (file) {
+          var reader = new FileReader();

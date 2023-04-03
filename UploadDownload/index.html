@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Upload/Download Example</title>
+</head>
+<body>
+    <h1>WebSocket Upload/Download Example</h1>
+    <form>
+        <input type="button" value="Upload" onclick="upload()">
+        <input type="text" id="filename" placeholder="Filename">
+        <input type="file" id="file">
+    </form>
+    <br>
+    <form>
+        <input type="button" value="Download" onclick="download()">
+        <input type="text" id="download-filename" placeholder="Filename">
+    </form>
+    <br>
+    <h2>Downloadable files:</h2>
+    <ul id="file-list">
+    </ul>
+    <script>
+        var ws = new WebSocket("ws://localhost:8765");
+
+        function upload() {
+            var file = document.getElementById("file").files[0];
+            var filename = document.getElementById("filename").value;
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onloadend = function() {
+                ws.send("upload");
+                ws.send(filename);
+                ws.send(file.size);
+                var data = new Uint8Array(reader.result);
+                ws.send(data);
+            }
+        }
+
+        function download() {
+            var filename = document.getElementById("download-filename").value;
+            ws.send("download");
+            ws.send(filename);
+            ws.onmessage = function(event) {
+                var data = event.data;
+                if (isNaN(data)) {
+                    alert(data);
+                } else {
+                    var filesize = parseInt(data);
+                    var blob = new Blob([], { type: file.type });
+                    var url = window.URL.createObjectURL(blob);
+                    var link = document.createElement("a");
+                    link.href = url;
+                    link.download = filename;
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            }
+        }
+
+        ws.onmessage = function(event) {
+            var data = event.data;
+            if (!isNaN(data)) {
+                var filesize = parseInt(data);
+                var filedata = new Uint8Array(filesize);
+                var offset = 0;
+                ws.onmessage = function(event) {
+                    var chunk = new Uint8Array(event.data);
+                    filedata.set(chunk, offset);
+                    offset += chunk.length;
+                    if (offset >= filesize) {
+                        var blob = new Blob([filedata], { type: "application/octet-stream" });
+                        var url = window.URL.createObjectURL(blob);
+                        var link = document.createElement("a");
+                        link.href = url;
+                        link.download = filename;
+                        link.click();
+                        window.URL.revokeObjectURL(url);
+                        ws.onmessage = null;
+                    }
+                }
+            } else {
+                var fileList = document.getElementById("file-list");
+                var listItem = document.createElement("li");
+                var link = document.createElement("a");
+                link.href = "#";
+                link.innerHTML = data;
+                link.onclick = function() {
+                    document.getElementById("download-filename").value = data;
+                    download();
+                    return false;
+                };
+                listItem.appendChild(link);
+                fileList.appendChild(listItem);
+            }
+        };
+    </script>
+</body>
+</html>
